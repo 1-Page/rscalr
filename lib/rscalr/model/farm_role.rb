@@ -1,3 +1,5 @@
+require 'rscalr/model/role'
+
 class FarmRole < Role
   attr_accessor :farm_role_id, :servers
   

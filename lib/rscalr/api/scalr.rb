@@ -42,7 +42,7 @@ class Scalr
 	  
   	  case response
   	  when Net::HTTPSuccess then
-          result = ScalrApiResponse.new response.body
+          result = ScalrResponse.new response.body
   	  else
   	    result = build_error_response(response)
   	  end
@@ -55,7 +55,7 @@ class Scalr
   end
   
   def build_error_response(message)
-    result = ScalrApiResponse.new "<?xml version='1.0?>"
+    result = ScalrResponse.new "<?xml version='1.0?>"
     result.add_element("Error")
     ele = REXML::Element.new "TransactionID"
     ele.text = generate_sig(message, Time.now.strftime("%Y-%m-%dT%H:%M:%SZ"))

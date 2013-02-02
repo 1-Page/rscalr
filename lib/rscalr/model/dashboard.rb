@@ -1,3 +1,6 @@
+require 'rscalr/model/farm'
+require 'rscalr/model/script'
+
 class Dashboard
   
   def initialize client
