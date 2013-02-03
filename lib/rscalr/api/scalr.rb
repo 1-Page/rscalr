@@ -3,6 +3,12 @@ require 'net/http'
 require 'cgi'
 require 'rexml/document'
 
+# Low-level Scalr API client. Instantiated with a hash containing config parameters (:key_id and :key_secret). 
+# All API methods are implemented as methods that return a ScalrResponse object. This object inherits from 
+# REXML::Document, making accessing the results pretty straightforward. 
+#
+# Unexpected errors (network, etc.) are also wrapped in an ad hoc ScalrResponse, with the transacation ID 
+# equal to 'sig:' + [signature used to sign the request] and the message equal to the error message.
 class Scalr
   attr_accessor :config
   
@@ -15,66 +21,6 @@ class Scalr
     @config[:version] = $DEFAULT_VERSION if @config[:version].nil?
     @config[:auth_version] = $DEFAULT_AUTH_VERSION if @config[:auth_version].nil?
   end
-  
-  def generate_sig(action, timestamp)
-    message = action + ':' + @config[:key_id] + ':' + timestamp
-    hexdigest = OpenSSL::HMAC.hexdigest('sha256', @config[:key_secret], message)
-    [[hexdigest].pack("H*")].pack("m0")
-  end
-  
-  def generate_timestamp(time)
-    time.strftime("%Y-%m-%dT%H:%M:%SZ")
-  end
-  
-  def execute_api_call(action, action_params=nil)
-  
-    begin
-  	  params = { :Action => action, :TimeStamp => generate_timestamp(Time.now) }
-	    params.merge!(action_params) unless action_params.nil?
-		
-  	  params[:Signature] = generate_sig(action, params[:TimeStamp])
-  	  params[:Version] = @config[:version]
-  	  params[:AuthVersion] = @config[:auth_version]
-  	  params[:KeyID] = @config[:key_id]
-			
-  	  uri = URI("https://api.scalr.net/?" + hash_to_querystring(params))
-	
-	    response = Net::HTTP.start(uri.host, uri.port, :use_ssl => true) do |http|
-  	    request = Net::HTTP::Get.new uri.request_uri
-  	    http.request request # Net::HTTPResponse object
-  	  end
-	  
-  	  case response
-  	  when Net::HTTPSuccess then
-          result = ScalrResponse.new response.body
-  	  else
-  	    result = build_error_response(response)
-  	  end
-	  
-  	rescue => ex
-  	  result = build_error_response(ex.message)
-  	end
-
-    result
-  end
-  
-  def build_error_response(message)
-    result = ScalrResponse.new "<?xml version='1.0?>"
-    result.add_element("Error")
-    ele = REXML::Element.new "TransactionID"
-    ele.text = generate_sig(message, generate_timestamp(Time.now))
-    result.root.elements << ele
-    ele = REXML::Element.new "Message"
-    ele.text = message
-    result.root.elements << ele
-
-	result
-  end
-  
-  def hash_to_querystring(h)
-    h.map{|k,v| "#{k.to_s}=#{CGI::escape(v.to_s)}"}.join('&')
-  end
-  
   
   #=================== API Section ===================================
   
@@ -302,6 +248,67 @@ class Scalr
     }
     
     execute_api_call('StatisticsGetGraphURL', params)
+  end
+  
+  #=============== Helper methods ==================================
+  
+  def generate_sig(action, timestamp)
+    message = action + ':' + @config[:key_id] + ':' + timestamp
+    hexdigest = OpenSSL::HMAC.hexdigest('sha256', @config[:key_secret], message)
+    [[hexdigest].pack("H*")].pack("m0")
+  end
+  
+  def generate_timestamp(time)
+    time.strftime("%Y-%m-%dT%H:%M:%SZ")
+  end
+  
+  def execute_api_call(action, action_params=nil)
+  
+    begin
+  	  params = { :Action => action, :TimeStamp => generate_timestamp(Time.now) }
+	    params.merge!(action_params) unless action_params.nil?
+		
+  	  params[:Signature] = generate_sig(action, params[:TimeStamp])
+  	  params[:Version] = @config[:version]
+  	  params[:AuthVersion] = @config[:auth_version]
+  	  params[:KeyID] = @config[:key_id]
+			
+  	  uri = URI("https://api.scalr.net/?" + hash_to_querystring(params))
+	
+	    response = Net::HTTP.start(uri.host, uri.port, :use_ssl => true) do |http|
+  	    request = Net::HTTP::Get.new uri.request_uri
+  	    http.request request # Net::HTTPResponse object
+  	  end
+	  
+  	  case response
+  	  when Net::HTTPSuccess then
+          result = ScalrResponse.new response.body
+  	  else
+  	    result = build_error_response(response, params[:Signature])
+  	  end
+	  
+  	rescue => ex
+  	  result = build_error_response(ex.message, params[:Signature])
+  	end
+
+    result
+  end
+  
+  def build_error_response(message, transaction_id)
+    result = ScalrResponse.new "<?xml version='1.0?>"
+    result.add_element("Error")
+    ele = REXML::Element.new "TransactionID"
+    ele.text = transaction_id
+    result.root.elements << ele
+    ele = REXML::Element.new "Message"
+    ele.text = message
+    result.root.elements << ele
+
+	  result
+  end
+  
+  def hash_to_querystring(h)
+    h.map{|k,v| "#{k.to_s}=#{CGI::escape(v.to_s)}"}.join('&')
   end
 end
 
