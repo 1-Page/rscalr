@@ -199,7 +199,7 @@ class Scalr
       :KeepDNSZone => (keep_dns_zone ? 1 : 0)
     }
     
-    execute_api_call('FarmLaunch', params)
+    execute_api_call('FarmTerminate', params)
   end
   
   def logs_list(farm_id, server_id=nil, start=nil, limit=nil)
