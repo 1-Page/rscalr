@@ -252,16 +252,19 @@ class Scalr
   
   #=============== Helper methods ==================================
   
+  # Generates request signature based on config, action, timestamp
   def generate_sig(action, timestamp)
     message = action + ':' + @config[:key_id] + ':' + timestamp
     hexdigest = OpenSSL::HMAC.hexdigest('sha256', @config[:key_secret], message)
     [[hexdigest].pack("H*")].pack("m0")
   end
   
+  # Generates a timestamp string based on a Time object
   def generate_timestamp(time)
     time.strftime("%Y-%m-%dT%H:%M:%SZ")
   end
   
+  # Executes the specified API call, passing in the specified params
   def execute_api_call(action, action_params=nil)
   
     begin
@@ -294,11 +297,12 @@ class Scalr
     result
   end
   
+  # Builds an ad hoc ScalrResponse to represent an unexpected error
   def build_error_response(message, transaction_id)
     result = ScalrResponse.new "<?xml version='1.0?>"
     result.add_element("Error")
     ele = REXML::Element.new "TransactionID"
-    ele.text = transaction_id
+    ele.text = "sig:#{transaction_id}"
     result.root.elements << ele
     ele = REXML::Element.new "Message"
     ele.text = message
@@ -307,11 +311,14 @@ class Scalr
 	  result
   end
   
+  # Turns a hash of request parameter key/value pairs into an escaped request query string.
+  # Keys are expected to not require escaping.
   def hash_to_querystring(h)
     h.map{|k,v| "#{k.to_s}=#{CGI::escape(v.to_s)}"}.join('&')
   end
 end
 
+# Represents a response from an API call. Thin wrapper around an REXML::Document of the parsed repsonse.
 class ScalrResponse < REXML::Document
   
   def initialize http_response_body=nil
@@ -322,10 +329,14 @@ class ScalrResponse < REXML::Document
     end
   end
     
+  # True iff the response indicates that the API call succeeded. This does not guarantee that
+  # the intent of the call succeeded of course (e.g. that a script executed successfully on the Scalr side), 
+  # only that Scalr reported success for the call.
   def success?
     root.name != 'Error'
   end
   
+  # If the API call was not successful, this returns the inner error message.
   def error_message
     if success?
       nil
