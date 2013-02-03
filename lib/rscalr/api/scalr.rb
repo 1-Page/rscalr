@@ -22,10 +22,14 @@ class Scalr
     [[hexdigest].pack("H*")].pack("m0")
   end
   
+  def generate_timestamp(time)
+    time.strftime("%Y-%m-%dT%H:%M:%SZ")
+  end
+  
   def execute_api_call(action, action_params=nil)
   
     begin
-  	  params = { :Action => action, :TimeStamp => Time.now.strftime("%Y-%m-%dT%H:%M:%SZ") }
+  	  params = { :Action => action, :TimeStamp => generate_timestamp(Time.now) }
 	    params.merge!(action_params) unless action_params.nil?
 		
   	  params[:Signature] = generate_sig(action, params[:TimeStamp])
@@ -58,7 +62,7 @@ class Scalr
     result = ScalrResponse.new "<?xml version='1.0?>"
     result.add_element("Error")
     ele = REXML::Element.new "TransactionID"
-    ele.text = generate_sig(message, Time.now.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    ele.text = generate_sig(message, generate_timestamp(Time.now))
     result.root.elements << ele
     ele = REXML::Element.new "Message"
     ele.text = message
