@@ -74,8 +74,147 @@ class Scalr
   
   #=================== API Section ===================================
   
+  def apache_vhost_create(domain_name, farm_id, farm_role_id, document_root_dir, enable_ssl, ssl_private_key=nil, ssl_certificate=nil)
+    params = { 
+      :DomainName => domain_name,
+      :FarmID => farm_id, 
+      :FarmRoleID => farm_role_id,
+      :DocumentRootDir => document_root_dir, 
+      :EnableSSL => enable_ssl 
+    }
+    params[:SSLPrivateKey] = ssl_private_key unless ssl_private_key.nil?
+    params[:SSLCertificate] = ssl_certificate unless ssl_certificate.nil?
+    
+    execute_api_call('ApacheVhostCreate', params)
+  end
+  
+  def apache_vhosts_list
+    execute_api_call('ApacheVhostsList')
+  end
+  
+  def bundle_task_get_status(bundle_task_id)
+    params = { :BundleTaskID => bundle_task_id }
+    
+    execute_api_call('BundleTaskGetStatus', params)
+  end
+  
+  def dm_application_deploy(application_id, farm_role_id, remote_path)
+    params = { :ApplicationID => application_id, :FarmRoleID => farm_role_id, :RemotePath => remote_path }
+
+    execute_api_call('DmApplicationDeploy', params)
+  end
+  
+  def dm_applications_list
+    execute_api_call('DmApplicationsList')
+  end
+  
+  def dm_sources_list
+    execute_api_call('DmSourcesList')
+  end
+  
+  def dns_zone_create(domain_name, farm_id=nil, farm_role_id=nil)
+    params = { :DomainName => domain_name }
+    params[:FarmID] = farm_id unless farm_id.nil?
+    params[:FarmRoleID] = farm_role_id unless farm_role_id.nil?
+    
+    execute_api_call('DNSZoneCreate', params)
+  end
+  
+  def dns_zone_record_add(zone_name, type, ttl, name, value, priority=nil, weight=nil, port=nil)
+    params = { 
+      :ZoneName => zone_name,
+      :Type => type, 
+      :TTL => ttl,
+      :Name => name, 
+      :Value => value 
+    }
+    params[:Priority] = priority unless priority.nil?
+    params[:Weight] = weight unless weight.nil?
+    params[:Port] = port unless port.nil?
+    
+    execute_api_call('DNSZoneRecordAdd', params)
+  end
+  
+  def dns_zone_record_remove(zone_name, record_id)
+    params = { :ZoneName => zone_name, :RecordID => record_id }
+    
+    execute_api_call('DNSZoneRecordRemove', params)
+  end
+  
+  def dns_zone_records_list(zone_name)
+    params = { :ZoneName => zone_name }
+    
+    execute_api_call('DNSZoneRecordsList', params)
+  end
+  
+  def dns_zones_list    
+    execute_api_call('DNSZonesList')
+  end
+  
+  def environments_list    
+    execute_api_call('EnvironmentsList')
+  end
+  
+  def events_list(farm_id, start=nil, limit=nil)
+    params = { :FarmID => farm_id }
+    params[:StartFrom] = start unless start.nil?
+    params[:RecordsLimit] = limit unless limit.nil?
+    
+    execute_api_call('EventsList', params)
+  end
+  
+  def farm_clone(farm_id)
+    params = { :FarmID => farm_id }
+
+    execute_api_call('FarmClone', params)
+  end
+  
+  def farm_get_stats(farm_id, date)
+    params = { :FarmID => farm_id }
+    params[:Date] = date.strftime("%m-%Y") unless date.nil?
+
+    execute_api_call('FarmGetStats', params)
+  end
+  
+  def farm_launch(farm_id)
+    params = { :FarmID => farm_id }
+
+    execute_api_call('FarmLaunch', params)
+  end
+  
   def farms_list
+  
     execute_api_call('FarmsList')
+  end
+  
+  def farm_terminate(farm_id, keep_ebs, keep_eip, keep_dns_zone)
+    params = { 
+      :FarmID => farm_id,
+      :KeepEBS => (keep_ebs ? 1 : 0), 
+      :KeepEIP => (keep_eip ? 1 : 0), 
+      :KeepDNSZone => (keep_dns_zone ? 1 : 0)
+    }
+    
+    execute_api_call('FarmLaunch', params)
+  end
+  
+  def logs_list(farm_id, server_id=nil, start=nil, limit=nil)
+    params = { :FarmID => farm_id }
+    params[:ServerID] = server_id unless server_id.nil?
+    params[:StartFrom] = start unless start.nil?
+    params[:RecordsLimit] = limit unless limit.nil?
+    
+    execute_api_call('LogsList', params)
+  end
+  
+  def roles_list(platform=nil, name=nil, prefix=nil, image_id=nil)
+    params = {}
+    params[:Platform] = platform unless platform.nil?
+    params[:Name] = name unless name.nil?
+    params[:Prefix] = prefix unless prefix.nil?
+    params[:ImageID] = image_id unless image_id.nil?
+
+	execute_api_call('RolesList', params)
   end
   
   def scripts_list
@@ -107,6 +246,32 @@ class Scalr
     execute_api_call('ScriptGetDetails', { :ScriptID => script_id })
   end
   
+  def server_image_create(server_id, role_name)
+    params = { :ServerID => server_id, :RoleName => role_name }
+    
+    execute_api_call('ServerImageCreate', params)
+  end
+  
+  def server_launch(farm_role_id, increase_max_instances=nil)
+    params = { :FarmRoleID => farm_role_id }
+    params[:IncreaseMaxInstances] = (increase_max_instances ? 1 : 0) unless increase_max_instances.nil?
+  
+  	execute_api_call('ServerLaunch', params)
+  end
+  
+  def server_reboot(server_id)
+  	params = { :ServerID => server_id }
+
+  	execute_api_call('ServerReboot', params)
+  end
+  
+  def server_terminate(server_id, decrease_min_instances=nil)
+    params = { :ServerID => server_id }
+    params[:DecreaseMinInstancesSetting] = (decrease_min_instances ? 1 : 0) unless decrease_min_instances.nil?
+  
+  	execute_api_call('ServerTerminate', params)
+  end
+  
   def farm_role_parameters_list(farm_role_id)
     execute_api_call('FarmRoleParametersList', { :FarmRoleID => farm_role_id })
   end
@@ -122,6 +287,17 @@ class Scalr
     params[:RecordsLimit] = limit unless limit.nil?
     
     execute_api_call('ScriptingLogsList', params)
+  end
+  
+  def statistics_get_graph_url(object_type, object_id, watcher_name, graph_type)
+    params = { 
+      :ObjectType => object_type,
+      :ObjectID => object_id, 
+      :WatcherName => watcher_name,
+      :GraphType => graph_type
+    }
+    
+    execute_api_call('StatisticsGetGraphURL', params)
   end
 end
 
