@@ -357,5 +357,10 @@ class ScalrResponse < REXML::Document
       root.elements['Message'].text
     end
   end
+  
+  # Convenience method to output a repsonse to a stream in a human readable format
+  def pretty_print(dest=$stdout)
+    write(dest, 1)
+  end
 end
 
