@@ -4,7 +4,12 @@ require 'test/unit'
 class TestClientFarms < Test::Unit::TestCase
   
   def setup
-    @scalr = Scalr.new({ :key_id => ENV['SCALR_TEST_API_KEY'], :key_secret => ENV['SCALR_TEST_API_SECRET'] })
+    @scalr = Scalr.new({
+      :key_id => ENV['SCALR_TEST_API_KEY'], 
+      :key_secret => ENV['SCALR_TEST_API_SECRET'], 
+      :env_id => ENV['SCALR_TEST_ENV_ID'] 
+    })
+      
     @farm_test1_name = 'test1'
   end
   

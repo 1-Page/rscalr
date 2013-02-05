@@ -275,6 +275,7 @@ class Scalr
   	  params[:Version] = @config[:version]
   	  params[:AuthVersion] = @config[:auth_version]
   	  params[:KeyID] = @config[:key_id]
+  	  params[:EnvID] = @config[:env_id] unless @config[:env_id].nil?
 			
   	  uri = URI("https://api.scalr.net/?" + hash_to_querystring(params))
 	
@@ -315,6 +316,10 @@ class Scalr
   # Keys are expected to not require escaping.
   def hash_to_querystring(h)
     h.map{|k,v| "#{k.to_s}=#{CGI::escape(v.to_s)}"}.join('&')
+  end
+  
+  def env_id= env_id
+    @config[:env_id] = env_id
   end
 end
 
