@@ -1,10 +1,8 @@
-require 'rscalr/model/farm'
-require 'rscalr/model/script'
-
 class Dashboard
-  
+
   def initialize client
     @client = client
+    @env_id = @client.env_id
   end
   
   def get_farm(name)
@@ -65,5 +63,32 @@ class Dashboard
     }
     
     @scripts
+  end
+  
+  def get_environment(name)
+    if @environments.nil?
+      load_environments
+    end
+    @environments[name]
+  end
+  
+  def load_environments
+    @environments = {}
+    
+    scalr_response = @client.environments_list
+    scalr_response.root.each_element('EnvironmentSet/Item') { |row| 
+      environment = Environment.new
+      
+      row.each_element { |prop| 
+        if "ID" == prop.name
+          environment.id = prop.text
+        elsif "Name" == prop.name
+          environment.name = prop.text
+        end
+      }
+      @environments[environment.name] = environment
+    }
+    
+    @environments
   end
 end

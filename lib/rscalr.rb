@@ -1,5 +1,6 @@
 require 'rscalr/api/scalr'
 require 'rscalr/model/dashboard'
+require 'rscalr/model/environment'
 require 'rscalr/model/farm'
 require 'rscalr/model/farm_role'
 require 'rscalr/model/role'
