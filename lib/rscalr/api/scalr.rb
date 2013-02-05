@@ -318,9 +318,17 @@ class Scalr
     h.map{|k,v| "#{k.to_s}=#{CGI::escape(v.to_s)}"}.join('&')
   end
   
+  # Changes the configured environment setting for this instance
   def env_id= env_id
     @config[:env_id] = env_id
   end
+  
+  # Get the current environment value. A nil response means the "first" environment will be assumed for API calls, 
+  # per the Scalr API docs.
+  def env_id
+    @config[:env_id]
+  end
+  
 end
 
 # Represents a response from an API call. Thin wrapper around an REXML::Document of the parsed repsonse.
