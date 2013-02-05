@@ -15,7 +15,7 @@ class Dashboard
   end
   
   def load_farms
-    @farms = {} if @farms == nil
+    @farms = {}
     
     scalr_response = @client.farms_list
     scalr_response.root.each_element('FarmSet/Item') { |row| 
