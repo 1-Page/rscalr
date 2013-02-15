@@ -47,4 +47,4 @@ script.execute farm.id
 Caveats
 -------
 
-This client library is a work in progress and is not yet complete. Feel free to submit pull requests and/or suggestions. I am not an experienced Rubyist, so if you see anything in the source that makes you cringe, by all means let me know!
+This client library contains the complete API, but has not been thoroughly tested. The domain model is incomplete and a work in progress. Feel free to submit pull requests and/or suggestions. I am not an experienced Rubyist, so if you see anything in the source that makes you cringe, by all means let me know!
