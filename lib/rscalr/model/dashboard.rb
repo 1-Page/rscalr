@@ -1,7 +1,12 @@
 class Dashboard
 
-  def initialize client
-    @client = client
+  def initialize config 
+    if config.is_a?(Scalr)
+      @client = config
+    elsif config.is_a?(Hash) 
+      @client = Scalr.new(config)
+    end
+    
     @env_id = @client.env_id
   end
   
