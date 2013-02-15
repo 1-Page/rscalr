@@ -57,6 +57,43 @@ class Farm
     @farm_roles
   end
   
+  # Loads a Loglist of Log entries for the farm, given the specified parameters
+  def load_logs(server_id=nil, start=nil, limit=nil)
+    scalr_response = @client.logs_list(@id, server_id, start, limit)
+    loglist = LogList.new
+    
+    scalr_response.root.each_element do |element|
+      if "TotalRecords" == element.name
+        loglist.total_records = element.text.to_i
+      elsif "StartFrom" == element.name
+        loglist.start = element.text.to_i
+      elsif "RecordsLimit" == element.name
+        loglist.limit = element.text.to_i
+      elsif "LogSet" == element.name
+        element.each_element do |item|
+          log = Log.new
+
+          item.each_element do |prop| 
+            if "ServerID" == prop.name
+              log.server_id = prop.text
+            elsif "Message" == prop.name
+              log.message = prop.text
+            elsif "Severity" == prop.name
+              log.severity = prop.text.to_i
+            elsif "Timestamp" == prop.name
+              log.timestamp = prop.text.to_i
+            elsif "Source" == prop.name
+              server.source = prop.text
+            end
+          end
+          loglist << log
+        end
+      end
+    end
+    
+    loglist
+  end
+  
   def to_s
     "{ type: \"farm\", id: #{@id}, name: \"#{@name}\", status: #{@status} }"
   end
