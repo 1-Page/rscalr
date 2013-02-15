@@ -5,6 +5,8 @@ class Dashboard
       @client = config
     elsif config.is_a?(Hash) 
       @client = Scalr.new(config)
+    else
+      raise 'Dashboard may only be initialized with a config Hash or Scalr object'
     end
     
     @env_id = @client.env_id
