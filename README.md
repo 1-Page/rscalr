@@ -36,8 +36,7 @@ Domain Model Usage
 
 ```ruby
 require 'rscalr'
-scalr = Scalr.new { :key_id => 'your-key-id', :key_secret => 'your-key-secret' }
-dashboard = Dashboard.new scalr
+dashboard = Dashboard.new { :key_id => 'your-key-id', :key_secret => 'your-key-secret' }
 farm = dashboard.get_farm 'my-farm-name'
 script = dashboard.get_script 'my-script-name'
 # execute the script on all instances in the farm (see Script.rb for all options)
