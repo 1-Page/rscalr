@@ -28,7 +28,7 @@ scalr = Scalr.new({ :key_id => 'your-key-id', :key_secret => 'your-key-secret' }
 # list all farms
 api_response = scalr.farms_list
 # Response objects exted REXML::Document, so you can work with them easily
-api_repsonse.write($stdout, 1)
+api_repsonse.pretty_print # Pretty-prints the response XML to a stream ($stdout by default)
 ```
 
 Domain Model Usage
