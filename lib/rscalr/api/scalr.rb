@@ -279,6 +279,7 @@ class Scalr
   	  params[:EnvID] = @config[:env_id] unless @config[:env_id].nil?
 			
   	  uri = URI("https://api.scalr.net/?" + hash_to_querystring(params))
+  	  $stdout.puts(uri) if @config[:verbose]
 	
 	    response = Net::HTTP.start(uri.host, uri.port, :use_ssl => true) do |http|
   	    request = Net::HTTP::Get.new uri.request_uri
