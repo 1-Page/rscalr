@@ -381,7 +381,9 @@ class ScalrResponse < REXML::Document
   
   # Convenience method to output a repsonse to a stream in a human readable format
   def pretty_print(dest=$stdout)
-    write(dest, 1);
+    formatter = REXML::Formatters::Pretty.new
+    formatter.compact = true
+    formatter.write(root,dest)
   end
 end
 
