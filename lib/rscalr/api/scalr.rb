@@ -230,9 +230,10 @@ class Scalr
     execute_api_call('FarmRoleUpdateParameterValue', { :FarmRoleID => farm_role_id, :ParamName => param_name, :ParamValue => param_value })
   end
 
-  def scripting_logs_list(farm_id, server_id=nil, start=nil, limit=nil)
+  def scripting_logs_list(farm_id, server_id=nil, event_id=nil, start=nil, limit=nil)
     params = { :FarmID => farm_id }
     params[:ServerID] = server_id unless server_id.nil?
+    params[:EventID] = event_id unless event_id.nil?
     params[:StartFrom] = start unless start.nil?
     params[:RecordsLimit] = limit unless limit.nil?
     
