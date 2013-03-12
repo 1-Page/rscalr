@@ -16,8 +16,13 @@ class Scalr
   $DEFAULT_VERSION = '2.3.0'
   $DEFAULT_AUTH_VERSION = '3'
   
-  def initialize(config)
-    @config = config
+  def initialize(config=nil)
+    if (config.nil?)
+      @config = load_config_from_environment
+    else
+      @config = config
+    end
+    
     @config[:version] = $DEFAULT_VERSION if @config[:version].nil?
     @config[:auth_version] = $DEFAULT_AUTH_VERSION if @config[:auth_version].nil?
   end
@@ -164,7 +169,7 @@ class Scalr
     params[:Prefix] = prefix unless prefix.nil?
     params[:ImageID] = image_id unless image_id.nil?
 
-	execute_api_call('RolesList', params)
+	  execute_api_call('RolesList', params)
   end
   
   def scripts_list
@@ -252,6 +257,18 @@ class Scalr
   end
   
   #=============== Helper methods ==================================
+  
+  # Loads config hash based on environment variables
+  def load_config_from_environment
+    config = {}
+    config[:key_id] = ENV['SCALR_API_KEY'] unless ENV['SCALR_API_KEY'].nil?
+    config[:key_secret] = ENV['SCALR_API_SECRET'] unless ENV['SCALR_API_SECRET'].nil?
+    config[:env_id] = ENV['SCALR_ENV_ID'] unless ENV['SCALR_ENV_ID'].nil?
+    config[:version] = ENV['SCALR_API_VERSION'] unless ENV['SCALR_API_VERSION'].nil?
+    config[:auth_version] = ENV['SCALR_API_AUTH_VERSION'] unless ENV['SCALR_API_AUTH_VERSION'].nil?
+    config[:verbose] = !!ENV['SCALR_CLIENT_VERBOSE']
+    config
+  end
   
   # Generates request signature based on config, action, timestamp
   def generate_sig(action, timestamp)

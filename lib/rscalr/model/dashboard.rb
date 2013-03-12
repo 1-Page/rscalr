@@ -1,12 +1,12 @@
 class Dashboard
 
-  def initialize config 
+  def initialize(config=nil)
     if config.is_a?(Scalr)
       @client = config
-    elsif config.is_a?(Hash) 
+    elsif config.nil? || config.is_a?(Hash) 
       @client = Scalr.new(config)
     else
-      raise 'Dashboard may only be initialized with a config Hash or Scalr object'
+      raise 'Dashboard may only be initialized with a config Hash, Scalr object, or nil (load config from environment)'
     end
     
     @env_id = @client.env_id
