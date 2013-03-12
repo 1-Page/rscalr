@@ -22,9 +22,7 @@ class TestObjLogs < Test::Unit::TestCase
     
     loglist = farm.load_logs
     
-    assert_not_nil(loglist, "Log list could not be loaded")
-    assert_equal(0, loglist.total_records, "Test farm 1 should not have any logs associated with it")
-    
+    assert_not_nil(loglist, "Log list could not be loaded")    
   end
   
 end
