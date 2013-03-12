@@ -9,7 +9,8 @@ class Script
   
   def execute(farm_id, timeout=30, async=:no_async, farm_role_id=nil, server_id=nil, revision=nil, config_vars=nil)
     set_revision(revision) # Side effect!
-    @client.script_execute farm_id, @id, timeout, async, farm_role_id, server_id, @revision, config_vars
+    api_response = @client.script_execute farm_id, @id, timeout, async, farm_role_id, server_id, @revision, config_vars
+    parse_script_execution_response(api_response)
   end
   
   def load_details
@@ -57,6 +58,23 @@ class Script
     end
   end
   
+  def parse_script_execution_response api_response
+    if api_response.success? 
+      result = nil
+      event_id = nil
+      api_response.root.each_element { |field| 
+        if "TransactionID" == field.name
+          event_id = field.text
+        elsif "Result" == field.name
+          result = field.text.to_i
+        end
+      }
+      ScriptExecution.new(@id, result, event_id)
+    elsif
+      ScriptExecution.new(@id, 0, nil)
+    end
+  end
+  
   def to_s
     "{ type: \"script\", id: #{@id}, name: \"#{@name}\" }"
   end
@@ -84,5 +102,24 @@ class ScriptRevision
   
   def to_s
     "{ type: \"script-revision\", revision: #{@revision}, date: \"#{@date}\", vars: \"#{@config_variables}\"}"
+  end
+end
+
+class ScriptExecution
+  attr_accessor :id, :result, :event_id
+  
+  def initialize(id, result, event_id)
+    @id = id
+    @result = result
+    @result = 0 if @result != 1
+    @event_id = event_id
+  end
+  
+  def success?
+    @result == 1
+  end
+  
+  def to_s
+    "{ type: \"script-execution\", script_id: #{@id}, result: #{@result}, event_id: \"#{@event_id}\"}"
   end
 end
