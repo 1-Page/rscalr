@@ -116,7 +116,7 @@ class Farm
             elsif "Timestamp" == prop.name
               log.timestamp = prop.text.to_i
             elsif "Source" == prop.name
-              server.source = prop.text
+              log.source = prop.text
             end
           end
           loglist << log
