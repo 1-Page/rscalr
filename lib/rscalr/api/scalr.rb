@@ -314,6 +314,8 @@ class Scalr
   	  result = build_error_response(ex.message, params[:Signature])
   	end
 
+	  $stdout.puts(result.pretty_print) if @config[:verbose]
+
     result
   end
   
@@ -379,7 +381,7 @@ class ScalrResponse < REXML::Document
   
   # Convenience method to output a repsonse to a stream in a human readable format
   def pretty_print(dest=$stdout)
-    write(dest, 1)
+    write(dest, 1);
   end
 end
 

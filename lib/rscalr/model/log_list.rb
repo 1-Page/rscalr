@@ -10,6 +10,12 @@ class LogList
     @logs << log if log.is_a? Log
   end
   
+  def each 
+    @logs.each { |log|
+      yield log  
+    }
+  end
+  
   def to_s
     "{ type: \"loglist\", total_records: #{@total_records}, start: \"#{@message}\", limit: #{@severity}, logs: [ #{@logs.each do |log| log.to_s + ',' end} ] }"
   end
