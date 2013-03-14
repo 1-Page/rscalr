@@ -43,6 +43,24 @@ script = dashboard.get_script 'my-script-name'
 script.execute farm.id
 ```
 
+Configuration
+-------------
+
+If you use this tool a lot from the command line, you can set environment variables that will automagically configure your Scalr or Dashboard instance. The following code sets the relevant parameters:
+```bash
+export SCALR_API_KEY=your-api-key
+export SCALR_API_SECRET=your-api-secret
+export SCALR_ENV_ID=id-of-desired-environment # optional
+export SCALR_CLIENT_VERBOSE=true # Print API calls/responses to stdout, optional, default=false
+```
+
+Then just instaniate your client: 
+```ruby
+scalr = Scalr.new
+# or
+dash = Dashboard.new
+```
+
 
 Caveats
 -------
