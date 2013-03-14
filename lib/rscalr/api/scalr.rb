@@ -266,7 +266,7 @@ class Scalr
     config[:env_id] = ENV['SCALR_ENV_ID'] unless ENV['SCALR_ENV_ID'].nil?
     config[:version] = ENV['SCALR_API_VERSION'] unless ENV['SCALR_API_VERSION'].nil?
     config[:auth_version] = ENV['SCALR_API_AUTH_VERSION'] unless ENV['SCALR_API_AUTH_VERSION'].nil?
-    config[:verbose] = !!ENV['SCALR_CLIENT_VERBOSE']
+    config[:verbose] = true if (ENV['SCALR_CLIENT_VERBOSE'] == "true" || ENV['SCALR_CLIENT_VERBOSE'] == "1")
     config
   end
   
