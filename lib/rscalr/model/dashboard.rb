@@ -115,28 +115,27 @@ class Dashboard
   def verify_script_success(script_execution, exit_value=0, timeout_sec=60)
     return false unless script_execution.success?
     
+    sleep_time = 5
+    
     start_time = Time.now.to_i
     
     # 1. get list of servers that this execution should run on
-    servers = {}
     farm = get_farm_by_id(script_execution.farm_id)
     if !script_execution.server_id.nil? 
       server = farm.get_server(script_execution.server_id)
-      servers[server.server_id] = nil
+      script_execution.add_server(server.server_id)
     elsif !script_execution.farm_role_id.nil?
       role_servers = farm.get_servers_for_role_id(script_execution.farm_role_id) 
       role_servers.each { |server|
-        servers[server.server_id] = nil
+        script_execution.add_server(server.server_id)
       }
     else
       farm_servers = farm.get_all_servers
       farm_servers.each { |server|
-        servers[server.server_id] = nil
+        script_execution.add_server(server.server_id)
       }
     end
-    
-    puts "Servers: #{servers}"
-    
+        
     # 2. Call logs list and match results to server IDs
     success = false
     finished = false
@@ -147,7 +146,7 @@ class Dashboard
         total_records = loglist.total_records
     
         loglist.each { |log|
-          servers[log.server_id] = (log.exec_exit_code == exit_value)
+          script_execution.set_server_result(log)
           start += 1
         }
       end while start < total_records
@@ -155,11 +154,11 @@ class Dashboard
       # 3. If not all servers have responses logged, repeat Step 2 until done or timeout_sec seconds have expired
       success = true
       finished = true
-      servers.each { |server_id, result|
-        success &&= result
+      script_execution.server_results.each { |server_id, result|
+        success &&= (!result.nil? && result.exec_exit_code == exit_value)
         finished &&= !result.nil?
       }
-    end while !finished && (Time.now.to_i - start_time) < timeout_sec
+    end while !finished && (Time.now.to_i - start_time) < (timeout_sec + sleep_time) && sleep(sleep_time)
     
     success
   end

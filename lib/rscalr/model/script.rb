@@ -104,25 +104,3 @@ class ScriptRevision
     "{ type: \"script-revision\", revision: #{@revision}, date: \"#{@date}\", vars: \"#{@config_variables}\"}"
   end
 end
-
-class ScriptExecution
-  attr_accessor :script_id, :result, :event_id, :farm_id, :farm_role_id, :server_id
-  
-  def initialize(script_id, result, event_id, farm_id, farm_role_id=nil, server_id=nil)
-    @script_id = script_id
-    @result = result
-    @result = 0 if @result != 1
-    @event_id = event_id
-    @farm_id = farm_id
-    @farm_role_id = farm_role_id
-    @server_id = server_id
-  end
-  
-  def success?
-    @result == 1
-  end
-  
-  def to_s
-    "{ type: \"script-execution\", script_id: #{@script_id}, result: #{@result}, event_id: \"#{@event_id}\"}"
-  end
-end
