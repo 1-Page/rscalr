@@ -350,6 +350,11 @@ class Scalr
     @config[:env_id]
   end
   
+  def verbose= setting
+    if !!setting == setting 
+      @config[:verbose] = !!setting
+    end
+  end
 end
 
 # Represents a response from an API call. Thin wrapper around an REXML::Document of the parsed repsonse.

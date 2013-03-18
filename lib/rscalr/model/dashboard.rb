@@ -162,4 +162,8 @@ class Dashboard
     
     success
   end
+  
+  def verbose= setting
+    @client.verbose = setting
+  end
 end
