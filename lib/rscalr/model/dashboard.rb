@@ -98,4 +98,31 @@ class Dashboard
     
     @environments
   end
+  
+  def get_role(name)
+    if @roles.nil?
+      load_roles
+    end
+    @roles[name]
+  end
+  
+  def load_roles
+    @roles = {}
+    
+    scalr_response = @client.roles_list
+    scalr_response.root.each_element('RoleSet/Item') { |row| 
+      role = Role.new
+      
+      row.each_element { |prop| 
+        if "ID" == prop.name
+          role.id = prop.text
+        elsif "Name" == prop.name
+          role.name = prop.text
+        end
+      }
+      @roles[role.name] = role
+    }
+    
+    @roles
+  end
 end
