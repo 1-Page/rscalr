@@ -12,9 +12,10 @@ require 'rexml/document'
 class Scalr
   attr_accessor :config
   
-  # Default versions
+  # Default values
   $DEFAULT_VERSION = '2.3.0'
   $DEFAULT_AUTH_VERSION = '3'
+  $DEFAULT_URL = 'https://api.scalr.net'
   
   def initialize(config=nil)
     if (config.nil?)
@@ -25,6 +26,7 @@ class Scalr
     
     @config[:version] = $DEFAULT_VERSION if @config[:version].nil?
     @config[:auth_version] = $DEFAULT_AUTH_VERSION if @config[:auth_version].nil?
+    @config[:url] = $DEFAULT_URL if @config[:url].nil?
   end
   
   #=================== API Section ===================================
@@ -263,10 +265,11 @@ class Scalr
     config = {}
     config[:key_id] = ENV['SCALR_API_KEY'] unless ENV['SCALR_API_KEY'].nil?
     config[:key_secret] = ENV['SCALR_API_SECRET'] unless ENV['SCALR_API_SECRET'].nil?
+    config[:url] = ENV['SCALR_URL'] unless ENV['SCALR_URL'].nil?
     config[:env_id] = ENV['SCALR_ENV_ID'] unless ENV['SCALR_ENV_ID'].nil?
     config[:version] = ENV['SCALR_API_VERSION'] unless ENV['SCALR_API_VERSION'].nil?
     config[:auth_version] = ENV['SCALR_API_AUTH_VERSION'] unless ENV['SCALR_API_AUTH_VERSION'].nil?
-    config[:verbose] = !!ENV['SCALR_CLIENT_VERBOSE']
+    config[:verbose] = true if (ENV['SCALR_CLIENT_VERBOSE'] == "true" || ENV['SCALR_CLIENT_VERBOSE'] == "1")
     config
   end
   
@@ -294,8 +297,8 @@ class Scalr
   	  params[:AuthVersion] = @config[:auth_version]
   	  params[:KeyID] = @config[:key_id]
   	  params[:EnvID] = @config[:env_id] unless @config[:env_id].nil?
-			
-  	  uri = URI("https://api.scalr.net/?" + hash_to_querystring(params))
+	
+  	  uri = URI(url + "?" + hash_to_querystring(params))
   	  $stdout.puts(uri) if @config[:verbose]
 	
 	    response = Net::HTTP.start(uri.host, uri.port, :use_ssl => true) do |http|
@@ -313,6 +316,8 @@ class Scalr
   	rescue => ex
   	  result = build_error_response(ex.message, params[:Signature])
   	end
+
+	  $stdout.puts(result.pretty_print) if @config[:verbose]
 
     result
   end
@@ -348,6 +353,22 @@ class Scalr
     @config[:env_id]
   end
   
+  # Changes the configured API endpoint for this instance
+  def url= url
+    @config[:url] = url
+  end
+  
+  # Get the current environment value. A nil response means the "first" environment will be assumed for API calls, 
+  # per the Scalr API docs.
+  def url
+    @config[:url]
+  end
+  
+  def verbose= setting
+    if !!setting == setting 
+      @config[:verbose] = !!setting
+    end
+  end
 end
 
 # Represents a response from an API call. Thin wrapper around an REXML::Document of the parsed repsonse.
@@ -379,7 +400,9 @@ class ScalrResponse < REXML::Document
   
   # Convenience method to output a repsonse to a stream in a human readable format
   def pretty_print(dest=$stdout)
-    write(dest, 1)
+    formatter = REXML::Formatters::Pretty.new
+    formatter.compact = true
+    formatter.write(root,dest)
   end
 end
 

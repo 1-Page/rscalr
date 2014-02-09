@@ -50,6 +50,7 @@ If you use this tool a lot from the command line, you can set environment variab
 ```bash
 export SCALR_API_KEY=your-api-key
 export SCALR_API_SECRET=your-api-secret
+export SCALR_URL=scalr-api-url, optional, default=https://api.scalr.net
 export SCALR_ENV_ID=id-of-desired-environment # optional
 export SCALR_CLIENT_VERBOSE=true # Print API calls/responses to stdout, optional, default=false
 ```

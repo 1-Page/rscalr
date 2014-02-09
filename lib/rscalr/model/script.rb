@@ -10,7 +10,7 @@ class Script
   def execute(farm_id, timeout=30, async=:no_async, farm_role_id=nil, server_id=nil, revision=nil, config_vars=nil)
     set_revision(revision) # Side effect!
     api_response = @client.script_execute farm_id, @id, timeout, async, farm_role_id, server_id, @revision, config_vars
-    parse_script_execution_response(api_response)
+    parse_script_execution_response(api_response, farm_id, farm_role_id, server_id)
   end
   
   def load_details
@@ -58,7 +58,7 @@ class Script
     end
   end
   
-  def parse_script_execution_response api_response
+  def parse_script_execution_response(api_response, farm_id, farm_role_id=nil, server_id=nil)
     if api_response.success? 
       result = nil
       event_id = nil
@@ -69,9 +69,9 @@ class Script
           result = field.text.to_i
         end
       }
-      ScriptExecution.new(@id, result, event_id)
+      ScriptExecution.new(@id, result, event_id, farm_id, farm_role_id, server_id)
     elsif
-      ScriptExecution.new(@id, 0, nil)
+      ScriptExecution.new(@id, 0, nil, farm_id)
     end
   end
   
@@ -102,24 +102,5 @@ class ScriptRevision
   
   def to_s
     "{ type: \"script-revision\", revision: #{@revision}, date: \"#{@date}\", vars: \"#{@config_variables}\"}"
-  end
-end
-
-class ScriptExecution
-  attr_accessor :id, :result, :event_id
-  
-  def initialize(id, result, event_id)
-    @id = id
-    @result = result
-    @result = 0 if @result != 1
-    @event_id = event_id
-  end
-  
-  def success?
-    @result == 1
-  end
-  
-  def to_s
-    "{ type: \"script-execution\", script_id: #{@id}, result: #{@result}, event_id: \"#{@event_id}\"}"
   end
 end
