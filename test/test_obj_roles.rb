@@ -4,11 +4,13 @@ require 'test/unit'
 class TestObjRoles < Test::Unit::TestCase
   
   def setup      
-    @dashboard = {
+    @scalr = Scalr.new({
       :key_id => ENV['SCALR_TEST_API_KEY'], 
       :key_secret => ENV['SCALR_TEST_API_SECRET'], 
       :env_id => ENV['SCALR_TEST_ENV_ID'] 
-    }    
+    })
+      
+    @dashboard = Dashboard.new @scalr   
   end
   
   def test_get_role_by_name
