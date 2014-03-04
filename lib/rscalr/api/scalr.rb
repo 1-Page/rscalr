@@ -55,6 +55,16 @@ class Scalr
     execute_api_call('BundleTaskGetStatus', params)
   end
   
+  def dm_application_create(name, source_id, pre_deploy_script = nil, post_deploy_script = nil)
+    params = { :Name => name,
+               :SourceID => source_id }
+
+    params[:PreDeployScript]  = pre_deploy_script unless pre_deploy_script.nil?
+    params[:PostDeployScript] = post_deploy_script unless post_deploy_script.nil?
+
+    execute_api_call('DmApplicationCreate', params)
+  end
+
   def dm_application_deploy(application_id, farm_role_id, remote_path)
     params = { :ApplicationID => application_id, :FarmRoleID => farm_role_id, :RemotePath => remote_path }
 
@@ -65,6 +75,30 @@ class Scalr
     execute_api_call('DmApplicationsList')
   end
   
+  def dm_deployment_task_get_log(deployment_task_id, start_from = nil, records_limit = nil)
+    params = { :DeploymentTaskID => deployment_task_id }
+
+    params[:StartFrom]    = start_from    unless start_from.nil?
+    params[:RecordsLimit] = records_limit unless records_limit.nil?
+
+    execute_api_call('DmDeploymentTaskGetLog', params)
+  end
+
+  def dm_deployment_task_get_status(deployment_task_id)
+    params = { :DeploymentTaskID => deployment_task_id }
+
+    execute_api_call('DmDeploymentTaskGetStatus', params)
+  end
+
+  def dm_deployment_tasks_list(farm_role_id = nil, server_id = nil, application_id = nil)
+    params = {}
+    params[:FarmRoleID]    = farm_role_id   unless farm_role_id.nil?
+    params[:ServerID]      = server_id      unless server_id.nil?
+    params[:ApplicationID] = application_id unless application_id.nil?
+
+    execute_api_call('DmDeploymentTasksList', params)
+  end
+
   def dm_sources_list
     execute_api_call('DmSourcesList')
   end
@@ -120,6 +154,32 @@ class Scalr
     execute_api_call('EventsList', params)
   end
   
+  def fire_custom_event(server_id, event_name, params = nil)
+    params = { :ServerID => server_id, :EventName => event_name }
+    params[:Params] = params unless params.nil?
+
+    execute_api_call('FireCustomEvent', params)
+  end
+
+  def global_variable_set(param_name, param_value, farm_id = nil, farm_role_id = nil)
+    params = { :ParamName => param_name, :ParamValue => param_value }
+    params[:FarmRoleID] = farm_role_id unless farm_role_id.nil?
+    params[:FarmID] = farm_id unless farm_id.nil?
+
+    execute_api_call('GlobalVariableSet', params)
+  end
+
+  def global_variables_list(role_id = nil, farm_id = nil, farm_role_id = nil, server_id = nil)
+    params = {}
+
+    params[:RoleID]     = role_id      unless role_id.nil?
+    params[:FarmRoleID] = farm_role_id unless farm_role_id.nil?
+    params[:FarmID]     = farm_id      unless farm_id.nil?
+    params[:ServerID]   = server_id    unless server_id.nil?
+
+    execute_api_call('GlobalVariablesList', params)
+  end
+
   def farm_clone(farm_id)
     params = { :FarmID => farm_id }
 
@@ -203,6 +263,12 @@ class Scalr
     execute_api_call('ScriptGetDetails', { :ScriptID => script_id })
   end
   
+  def server_get_extended_information(server_id)
+    params = { :ServerID => server_id }
+
+    execute_api_call('ServerGetExtendedInformation', params)
+  end
+
   def server_image_create(server_id, role_name)
     params = { :ServerID => server_id, :RoleName => role_name }
     
